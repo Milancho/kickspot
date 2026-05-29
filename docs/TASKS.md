@@ -7,6 +7,22 @@
 
 ---
 
+## Progress
+
+- ✅ **Phase 0 — Project Setup** (scaffold, routing, bottom nav, PWA manifest)
+- ✅ **Phase 1 — UI with sample data** (all 7 pages, loading/empty states)
+- ✅ **Phase 2 — Firebase reads** (env-guarded config, `getPlayers` listener,
+  `Player` model; Standings + Players wired with demo-data fallback)
+- 🟡 **Phase 6 (partial)** — Create Team flow prototyped against sample data:
+  auto-naming, nickname, 2–4 players, order-independent reuse by player ID.
+  Not yet persisted to Firestore.
+- ⬜ Phases 3–5, 7–10 — not started.
+
+Demo mode runs without keys; add `.env` for live Firestore. Build is green
+(`npm run build`) with no console errors.
+
+---
+
 ## Phase 0 — Project Setup
 
 | ID | Task | Effort |

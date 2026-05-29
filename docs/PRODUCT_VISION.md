@@ -62,7 +62,7 @@ smart features.
 | Database | Firebase Firestore |
 | Hosting | Firebase Hosting |
 | Styling | Custom CSS |
-| AI | Claude API (claude-opus-4-5) |
+| AI | Claude API (claude-opus-4-8) |
 | Admin Auth | 4-digit PIN |
 
 ---

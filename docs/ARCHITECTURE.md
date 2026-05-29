@@ -22,7 +22,7 @@ Simple, ships fast, scales later.
 | Hosting | Firebase Hosting | One command deploy |
 | PWA | vite-plugin-pwa | Auto service worker, installable |
 | Styling | Custom CSS | Full control, no framework dependency |
-| AI | Claude API (`claude-opus-4-5`) | Team names, formations, commentary |
+| AI | Claude API (`claude-opus-4-8`) | Team names, formations, commentary |
 | Admin Auth | 4-digit PIN vs Firestore | No Firebase Auth needed in v1 |
 | Location Share | Web Share API | Built into mobile browsers |
 
@@ -94,7 +94,7 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
     "anthropic-version": "2023-06-01"
   },
   body: JSON.stringify({
-    model: "claude-opus-4-5",
+    model: "claude-opus-4-8",
     max_tokens: 300,
     messages: [{ role: "user", content: YOUR_PROMPT }]
   })
