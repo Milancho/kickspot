@@ -46,6 +46,7 @@ export class Team {
     playerNames = [],
     wins = 0,
     losses = 0,
+    isDeleted = false,
     createdAt = null,
   } = {}) {
     this.id = id;
@@ -55,6 +56,7 @@ export class Team {
     this.playerNames = playerNames;
     this.wins = wins;
     this.losses = losses;
+    this.isDeleted = isDeleted;
     this.createdAt = createdAt;
   }
 
@@ -77,6 +79,7 @@ export class MatchResult {
     team2Players = [],
     score1 = 0,
     score2 = 0,
+    isDeleted = false,
     createdAt = null,
     updatedAt = null,
   } = {}) {
@@ -92,6 +95,7 @@ export class MatchResult {
     this.team2Players = team2Players;
     this.score1 = score1;
     this.score2 = score2;
+    this.isDeleted = isDeleted;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

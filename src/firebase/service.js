@@ -131,6 +131,7 @@ export function getTeams(onChange, onError) {
     (rows) => {
       const teams = rows
         .map((r) => Team.fromFirestore(r.id, r))
+        .filter((t) => !t.isDeleted)
         .sort((a, b) => (b.wins || 0) - (a.wins || 0));
       onChange(teams);
     },
@@ -154,8 +155,9 @@ export function updateTeam(id, patch) {
   return backend.update("teams", id, patch);
 }
 
+/** Soft-delete: hides the team from lists but preserves match history. */
 export function deleteTeam(id) {
-  return backend.remove("teams", id);
+  return backend.update("teams", id, { isDeleted: true });
 }
 
 /** Copy a previous date's teams to a new date with stats reset to zero. */
@@ -168,6 +170,7 @@ export function getMatches(date, onChange, onError) {
     (rows) => {
       const matches = rows
         .map((r) => MatchResult.fromFirestore(r.id, r))
+        .filter((m) => !m.isDeleted)
         .filter((m) => !date || m.date === date);
       onChange(matches);
     },
@@ -219,8 +222,9 @@ export async function updateMatch(id, patch) {
   await recalculateStats();
 }
 
+/** Soft-delete: hides the match and recalculates stats without it. */
 export async function deleteMatch(id) {
-  await backend.remove("matches", id);
+  await backend.update("matches", id, { isDeleted: true, updatedAt: nowISO() });
   await recalculateStats();
 }
 
@@ -235,7 +239,7 @@ export async function recalculateStats() {
     backend.list("players"),
     backend.list("teams"),
   ]);
-  const finished = matches.filter((m) => m.status !== "live");
+  const finished = matches.filter((m) => m.status !== "live" && !m.isDeleted);
   const ps = computePlayerStats(finished);
   const ts = computeTeamStats(finished);
   await Promise.all([
