@@ -43,8 +43,15 @@ export function updatePlayer(id, patch) {
   return backend.update("players", id, patch);
 }
 
-/** Soft delete — historical data is preserved. */
-export function softDeletePlayer(id) {
+/** Mark a player as inactive (isDeleted: true).
+ *  Throws if the player still belongs to a team — remove them first. */
+export async function softDeletePlayer(id) {
+  const teams = await backend.list("teams");
+  const memberOf = teams.filter((t) => (t.playerIds || []).includes(id));
+  if (memberOf.length > 0) {
+    const names = memberOf.map((t) => t.nickname || t.name).join(", ");
+    throw new Error(`Player is part of a team (${names}). Remove them from the team first.`);
+  }
   return backend.update("players", id, { isDeleted: true });
 }
 

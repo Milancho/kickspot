@@ -61,8 +61,10 @@ export default function Players() {
   const { adminMode } = useAdmin();
   const [players, setPlayers] = useState(null);
   const [joining, setJoining] = useState(false);
-  const [editing, setEditing] = useState(null); // player or null
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [confirmDeactivate, setConfirmDeactivate] = useState(null);
+  const [deactivateError, setDeactivateError] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
 
   useEffect(() => {
     const unsub = getPlayers(
@@ -71,6 +73,19 @@ export default function Players() {
     );
     return unsub;
   }, []);
+
+  async function handleDeactivate() {
+    setDeactivateError(null);
+    setDeactivating(true);
+    try {
+      await softDeletePlayer(confirmDeactivate.id);
+      setConfirmDeactivate(null);
+    } catch (err) {
+      setDeactivateError(err.message);
+    } finally {
+      setDeactivating(false);
+    }
+  }
 
   return (
     <div className="page">
@@ -83,7 +98,7 @@ export default function Players() {
       {players === null ? (
         <Loading label="Loading players…" />
       ) : players.length === 0 ? (
-        <Empty>No players yet. Tap “Join” to add yourself!</Empty>
+        <Empty>No players yet. Tap "Join" to add yourself!</Empty>
       ) : (
         players.map((p) => (
           <div className="card" key={p.id}>
@@ -104,9 +119,9 @@ export default function Players() {
                   </button>
                   <button
                     className="btn btn-ghost btn-sm"
-                    onClick={() => setConfirmDelete(p)}
+                    onClick={() => { setDeactivateError(null); setConfirmDeactivate(p); }}
                   >
-                    Delete
+                    Deactivate
                   </button>
                 </div>
               )}
@@ -136,20 +151,21 @@ export default function Players() {
         </Modal>
       )}
 
-      {confirmDelete && (
-        <Modal title="Delete player?" onClose={() => setConfirmDelete(null)}>
+      {confirmDeactivate && (
+        <Modal title="Deactivate player?" onClose={() => setConfirmDeactivate(null)}>
           <p className="meta">
-            Remove <strong>{confirmDelete.name}</strong>? Their match history is
-            kept (soft delete) — they just disappear from lists.
+            Mark <strong>{confirmDeactivate.name}</strong> as inactive? Their
+            match history is kept — they just disappear from lists.
           </p>
+          {deactivateError && (
+            <p className="error-text">{deactivateError}</p>
+          )}
           <button
             className="btn btn-danger btn-block"
-            onClick={async () => {
-              await softDeletePlayer(confirmDelete.id);
-              setConfirmDelete(null);
-            }}
+            disabled={deactivating}
+            onClick={handleDeactivate}
           >
-            Delete
+            {deactivating ? "Deactivating…" : "Deactivate"}
           </button>
         </Modal>
       )}
