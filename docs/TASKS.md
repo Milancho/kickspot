@@ -9,58 +9,155 @@
 
 ## Progress
 
-All application code (Phases 0–10) is implemented and runs end-to-end.
+All application code is complete and verified locally. **Today's work: Firebase setup & deploy.**
 
-- ✅ **Phase 0** — scaffold, routing, bottom nav, PWA manifest + SVG icon
-- ✅ **Phase 1** — all 7 pages, loading/empty states
-- ✅ **Phase 2** — env-guarded backend, realtime reads, models
-- ✅ **Phase 3** — Join form, add / edit / soft-delete players
-- ✅ **Phase 4** — PIN unlock + first-launch setup, admin management, conditional controls
-- ✅ **Phase 5** — per-date availability (upsert), live count
-- ✅ **Phase 6** — teams persist: create, edit, delete, copy-from-date,
-  order-independent reuse by player ID, available-pool selection
-- ✅ **Phase 7** — add / edit / delete matches (first-to-21, no ties),
-  full stats recalc on every change, unit tests (`npm test`, 7 passing)
-- ✅ **Phase 8** — Claude AI: team-name suggestions, balanced-team suggester,
-  match commentary — all with graceful local fallbacks (work without a key)
-- ✅ **Phase 9** — date-range standings (week/month/year/all), reports,
-  venue share via Web Share API
-- ✅ **Phase 10** — loading/empty/error states, disabled-state styling, PWA icon
+### ✅ Code complete
 
-### Architecture note (added during build)
+| Phase | What was built |
+|---|---|
+| 0 | Scaffold, routing, bottom nav, PWA manifest + SVG icon |
+| 1 | All 7 pages with loading/empty states |
+| 2 | Env-guarded backend — Firestore or in-memory demo store, realtime reads, models |
+| 3 | Players — Join form, edit, soft-delete |
+| 4 | Admin — 4-digit PIN (SHA-256 hashed), first-launch setup, admin management |
+| 5 | Availability — per-date upsert toggles, live count |
+| 6 | Teams — create, edit, delete, copy-from-date, reuse by player ID, AI names/balance |
+| 7 | Matches — record result (first-to-21, no ties), full stats recalc, unit tests (7 passing) |
+| 8 | Claude AI — team names, balanced split, match commentary (graceful offline fallbacks) |
+| 9 | Reports — week/month/year; date-range standings; venue share |
+| 10 | Polish — modal/toast, disabled states, PWA icon |
+| + | Security — PIN hashing, App Check (reCAPTCHA v3) wired, Firestore rules ready |
+| + | Monetization — Ko-fi tip jar (optional, env-controlled) |
 
-All backend access goes through `service.js` → `backend.js`, which routes to
-either **real Firestore** (when `.env` keys are present) or an **in-memory demo
-store** (`demoStore.js`, seeded from `data/fakeData.js`). The app is fully
-functional locally in demo mode and switches to Firestore with zero code
-changes once configured.
+### 🔲 Today — Firebase setup & deploy (your turn)
 
-### Still owned by you (the human), planned for later
+See the **Deploy Checklist** section below.
 
-**Firebase setup (do in order):**
-1. Create the Firebase project + enable Firestore (test mode to start)
-2. Fill `.env` from `.env.example` (Firebase keys + Claude key)
-3. Open the app — first-launch PIN setup creates `/config/admins` with a hashed PIN
-4. Add `/config/venue` in the Firebase console (name, address, lat, lng)
-5. Go to Firebase console → **Firestore → Rules** — replace test mode with the
-   validated rules documented in the Security section of CLAUDE.md
-6. Go to **google.com/recaptcha** → register a reCAPTCHA v3 site key
-   (add your hosting domain + localhost as allowed origins)
-7. Go to Firebase console → **App Check** → register your web app with that key
-8. Add `VITE_RECAPTCHA_SITE_KEY=<key>` to `.env`
-9. Click **Enforce** on Firestore in the App Check console — from this point
-   scripts cannot write to your database
-10. Set a **GCP billing budget** in Google Cloud console with a hard cap (e.g. $10/month)
-11. Set an **Anthropic spending limit** for the Claude API key
-12. `firebase init hosting` → set `dist` as public dir, configure rewrites for SPA
-13. `firebase deploy` → app is live
-14. Optional: add a GitHub Action (`npm ci && npm test && npm run build && firebase deploy`)
+`npm run build` ✅ · `npm test` ✅ (7 passing) · zero console errors
 
-**On-device testing:**
-- Android Chrome: open URL → "Add to Home Screen" prompt appears
-- iOS Safari: Share button → "Add to Home Screen"
+---
 
-Build is green (`npm run build`), tests pass (`npm test`), no console errors.
+## Deploy Checklist — Do Today
+
+### Step 1 — Firebase project (~10 min)
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com)
+2. **Add project** → name it `kickspot` → disable Google Analytics (not needed)
+3. **Firestore Database** → Create database → choose your region → **Start in test mode** (you'll lock it down in Step 4)
+4. **Project settings → Your apps → Add app → Web** → register app, copy the config snippet
+
+### Step 2 — Fill .env (~5 min)
+
+```bash
+cp .env.example .env
+```
+
+Paste the Firebase config values into `.env`. Also add:
+- `VITE_CLAUDE_API_KEY` — from [console.anthropic.com](https://console.anthropic.com)
+- Leave `VITE_RECAPTCHA_SITE_KEY` blank for now (you'll add it in Step 5)
+- Leave `VITE_SUPPORT_URL` blank unless you've set up Ko-fi already
+
+Test it works: `npm run dev` → open app → standings should no longer say "Demo mode".
+
+### Step 3 — Seed initial data (~10 min, in the app)
+
+With the app running against live Firebase:
+
+1. Open the app → **⚙️ gear** (top-right on any page) → **Admin**
+2. It will detect no admins exist → **first-launch setup** → enter your name + a 4-digit PIN
+3. After unlocking → go to **Admin** → tap the venue card → add venue details in Firebase console:
+   - Firestore console → `config` collection → `venue` document:
+     `{ name: "...", address: "...", lat: 41.99, lng: 21.43 }`
+4. Go to **Players** → **+ Join** → add your real players
+5. Go to **Availability**, **Teams**, **Matches** — add today's session data
+
+### Step 4 — Firestore security rules (~5 min)
+
+In Firebase console → **Firestore → Rules** — replace the test-mode rules with:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /players/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll(['name','wins','losses','isDeleted','createdAt'])
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 100;
+      allow update: if request.resource.data.name is string
+                    && request.resource.data.name.size() <= 100;
+      allow delete: if false;
+    }
+    match /teams/{id} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasAll(['name','date','playerIds','playerNames','wins','losses'])
+                   && request.resource.data.name.size() <= 100;
+    }
+    match /matches/{id} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasAll(['date','team1Id','team2Id','score1','score2']);
+    }
+    match /availability/{id} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasAll(['date','playerId','isAvailable']);
+    }
+    match /config/{id} {
+      allow read: if true;
+      allow write: if true;   // no Firebase Auth → rely on PIN hashing + App Check
+    }
+  }
+}
+```
+
+### Step 5 — App Check / reCAPTCHA v3 (~10 min)
+
+Blocks scripts from flooding the database with fake data.
+
+1. Go to [google.com/recaptcha](https://www.google.com/recaptcha/admin/create)
+   - Type: **reCAPTCHA v3**
+   - Domains: add your Firebase Hosting domain (e.g. `kickspot.web.app`) + `localhost`
+   - Copy the **Site Key**
+2. Add to `.env`: `VITE_RECAPTCHA_SITE_KEY=<your-site-key>`
+3. Firebase console → **App Check** → click your web app → provider: **reCAPTCHA v3** → paste site key
+4. Click **Enforce** on Firestore → scripts blocked ✅
+
+### Step 6 — Spending limits (~5 min, important)
+
+- **Google Cloud**: [console.cloud.google.com](https://console.cloud.google.com) → Billing → Budgets & alerts → Create budget → set €10/month hard cap
+- **Anthropic**: [console.anthropic.com](https://console.anthropic.com) → Settings → Limits → set monthly spend limit (e.g. $5)
+
+### Step 7 — Firebase Hosting & deploy (~10 min)
+
+```bash
+npm install -g firebase-tools   # if not already installed
+firebase login
+firebase init hosting
+```
+
+When prompted:
+- Public directory: **`dist`**
+- Single-page app: **Yes**
+- Overwrite index.html: **No**
+
+```bash
+npm run build
+firebase deploy
+```
+
+App is live at `https://kickspot.web.app` (or your custom project URL) ✅
+
+### Step 8 — Test on a real phone (~5 min)
+
+- **Android Chrome**: open the URL → browser shows "Add to Home Screen" banner → install
+- **iOS Safari**: open URL → tap Share → "Add to Home Screen" → install
+- Test the full flow: join as a player, mark availability, form a team, record a match
+
+### Optional — Ko-fi support link
+
+1. Create a free account at [ko-fi.com](https://ko-fi.com)
+2. Add to `.env`: `VITE_SUPPORT_URL=https://ko-fi.com/yourname`
+3. `npm run build && firebase deploy`
+4. A subtle "☕ Support KickSpot" link appears at the bottom of Standings, and a card with a share button appears in the Admin menu
 
 ---
 

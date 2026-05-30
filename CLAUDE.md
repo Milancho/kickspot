@@ -24,8 +24,9 @@ Installs on mobile from the browser — no App Store.
 | Hosting | Firebase Hosting |
 | PWA | vite-plugin-pwa |
 | Styling | Custom CSS — no UI framework, no Tailwind |
-| AI | Claude API — model `claude-opus` |
-| Admin Auth | 4-digit PIN checked against Firestore — no Firebase Auth |
+| AI | Claude API — model `claude-opus-4-8` |
+| Admin Auth | 4-digit PIN (SHA-256 hashed) checked against Firestore — no Firebase Auth |
+| Anti-abuse | Firebase App Check (reCAPTCHA v3) — blocks direct API flooding |
 
 ---
 
@@ -44,23 +45,35 @@ kickspot/
     ├── main.jsx
     ├── App.jsx                   ← Router + navigation
     ├── index.css                 ← Global styles + CSS variables
+    ├── constants.js              ← WIN_TARGET, POINTS, TEAM_MIN/MAX_PLAYERS
     ├── firebase/
-    │   ├── config.js             ← Firebase init
+    │   ├── config.js             ← Firebase init + App Check (reCAPTCHA v3)
+    │   ├── backend.js            ← Routes to Firestore or in-memory demo store
+    │   ├── demoStore.js          ← In-memory backend (no Firebase keys needed)
+    │   ├── models.js             ← Player, Team, MatchResult, Availability
     │   └── service.js            ← ALL Firestore CRUD — no Firestore calls outside this file
     ├── claude/
-    │   └── aiService.js          ← ALL Claude API calls — no fetch to Claude outside this file
+    │   └── aiService.js          ← ALL Claude API calls — graceful local fallbacks
     ├── context/
-    │   └── AdminContext.jsx      ← adminMode boolean shared across app
+    │   └── AdminContext.jsx      ← admin + adminMode + login/logout shared across app
+    ├── components/
+    │   └── ui.jsx                ← PageHeader, Modal, Loading, Empty, Tabs, todayISO
+    ├── data/
+    │   └── fakeData.js           ← Seed data for demo mode
     ├── utils/
-    │   └── statsCalculator.js    ← recalculateStats — pure JS, no Firebase imports
+    │   ├── statsCalculator.js    ← Pure JS: points, sort, computePlayerStats, computeTeamStats
+    │   ├── statsCalculator.test.js ← Vitest unit tests (npm test)
+    │   ├── teamName.js           ← defaultTeamName, playerLabel, findTeamByPlayers, playerSetKey
+    │   ├── dates.js              ← todayISO, formatDate, rangeStart, inRange
+    │   └── crypto.js             ← hashPin (SHA-256 via Web Crypto API)
     └── pages/
-        ├── Standings.jsx
-        ├── Players.jsx
-        ├── Availability.jsx
-        ├── Teams.jsx
-        ├── Matches.jsx
-        ├── Reports.jsx
-        └── AdminMenu.jsx
+        ├── Standings.jsx         ← Leaderboard + date-range filter
+        ├── Players.jsx           ← Join, edit, soft-delete
+        ├── Availability.jsx      ← Per-date in/out toggles
+        ├── Teams.jsx             ← Form, persist, reuse, AI balance/names
+        ├── Matches.jsx           ← Record result, stats recalc, AI commentary
+        ├── Reports.jsx           ← Week/month/year summaries
+        └── AdminMenu.jsx         ← PIN unlock, admins, venue share, Ko-fi support
 ```
 
 ---
