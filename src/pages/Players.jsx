@@ -116,13 +116,28 @@ export default function Players() {
       ) : players.length === 0 ? (
         <Empty>No players yet.{adminMode ? ' Tap “+ Add player” to get started.' : ' Ask the admin to add players.'}</Empty>
       ) : (
-        players.map((p) => (
+        players.map((p) => {
+          const label = playerLabel(p, players);
+          const initials = label.split(/[\s(&]/)[0].slice(0, 2).toUpperCase();
+          const winRate = p.wins + p.losses > 0
+            ? Math.round((p.wins / (p.wins + p.losses)) * 100)
+            : null;
+          const avatarColor = winRate === null ? "var(--surface-2)"
+            : winRate >= 60 ? "var(--primary)"
+            : winRate >= 40 ? "var(--accent)"
+            : "var(--danger)";
+          return (
           <div className="card" key={p.id}>
             <div className="list-row">
-              <div>
-                <div className="name">{playerLabel(p, players)}</div>
-                <div className="meta">
-                  {p.wins}W · {p.losses}L
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div className="player-avatar" style={{ background: avatarColor }}>
+                  {initials}
+                </div>
+                <div>
+                  <div className="name">{label}</div>
+                  <div className="meta">
+                    {p.wins}W · {p.losses}L{winRate !== null ? ` · ${winRate}%` : ""}
+                  </div>
                 </div>
               </div>
               {adminMode && (
@@ -143,7 +158,8 @@ export default function Players() {
               )}
             </div>
           </div>
-        ))
+          );
+        })
       )}
 
       {joining && (

@@ -10,12 +10,12 @@ import AdminMenu from "./pages/AdminMenu.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 
 const NAV_ITEMS = [
-  { to: "/standings", label: "Standings", icon: "🏆" },
+  { to: "/standings", label: "Table", icon: "🏆" },
   { to: "/players", label: "Players", icon: "👤" },
-  { to: "/availability", label: "Available", icon: "✅" },
+  { to: "/availability", label: "Today", icon: "✅" },
   { to: "/teams", label: "Teams", icon: "🛡️" },
   { to: "/matches", label: "Matches", icon: "⚽" },
-  { to: "/reports", label: "Reports", icon: "📊" },
+  { to: "/reports", label: "Stats", icon: "📊" },
 ];
 
 function BottomNav() {

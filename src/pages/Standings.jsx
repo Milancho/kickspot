@@ -11,6 +11,8 @@ import {
 import { teamDisplayName, playerLabel } from "../utils/teamName.js";
 import { inRange } from "../utils/dates.js";
 
+const MEDALS = ["🥇", "🥈", "🥉"];
+
 function StandingsTable({ rows }) {
   if (!rows.length) return <Empty>No standings yet.</Empty>;
   const sorted = sortStandings(rows);
@@ -28,8 +30,8 @@ function StandingsTable({ rows }) {
       </thead>
       <tbody>
         {sorted.map((row, i) => (
-          <tr key={row.id}>
-            <td className="rank">{i + 1}</td>
+          <tr key={row.id} className={i < 3 ? `top-${i + 1}` : ""}>
+            <td className="rank">{MEDALS[i] || i + 1}</td>
             <td className="col-name">{row.name}</td>
             <td className="col-played">{played(row)}</td>
             <td>{row.wins || 0}</td>
@@ -84,7 +86,10 @@ export default function Standings() {
 
   return (
     <div className="page">
-      <PageHeader title="Standings" subtitle="Find your game. Play your way." />
+      <PageHeader
+        title="🏆 Table"
+        subtitle={`${(players || []).length} players · ${matches.filter(m => !m.isDeleted && m.status !== "live").length} sets played`}
+      />
 
       {!firebaseEnabled && (
         <div className="notice">
