@@ -8,6 +8,7 @@ import {
   addAdmin,
   deleteAdmin,
   getVenue,
+  recalculateStats,
 } from "../firebase/service.js";
 
 function PinField({ value, onChange, onEnter, placeholder = "••••" }) {
@@ -133,6 +134,35 @@ function AddAdminForm() {
         onClick={submit}
       >
         Add admin
+      </button>
+    </div>
+  );
+}
+
+function RecalcCard() {
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const run = async () => {
+    setBusy(true);
+    setDone(false);
+    try {
+      await recalculateStats();
+      setDone(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="card">
+      <div className="name" style={{ marginBottom: 4 }}>Recalculate stats</div>
+      <div className="meta" style={{ marginBottom: 10 }}>
+        Rebuilds all player and team win/loss counts from match history.
+        Run this if standings look wrong after editing or importing matches.
+      </div>
+      <button className="btn btn-block" disabled={busy} onClick={run}>
+        {busy ? "Recalculating…" : done ? "Done ✓" : "Recalculate now"}
       </button>
     </div>
   );
@@ -279,6 +309,7 @@ export default function AdminMenu() {
 
           <AddAdminForm />
           <VenueShare />
+          <RecalcCard />
           <SupportCard />
         </>
       )}

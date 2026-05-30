@@ -6,17 +6,11 @@ export function todayISO() {
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
-/** Format "2026-05-29" → "Fri, 29 May 2026" for display. */
+/** Format "2026-05-29" → "29/05/2026" for display. */
 export function formatDate(iso) {
   if (!iso) return "";
-  const [y, m, d] = iso.split("-").map(Number);
-  const dt = new Date(y, m - 1, d);
-  return dt.toLocaleDateString(undefined, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
 }
 
 /**
@@ -29,8 +23,12 @@ export function rangeStart(range, refISO) {
   const [y, m, d] = refISO.split("-").map(Number);
   const ref = new Date(y, m - 1, d);
   const out = new Date(ref);
-  if (range === "week") out.setDate(ref.getDate() - 6);
-  else if (range === "month") out.setMonth(ref.getMonth() - 1);
+  if (range === "week") {
+    const day = ref.getDay();                  // 0=Sun, 1=Mon, …, 6=Sat
+    const daysBack = day === 0 ? 6 : day - 1; // steps back to Monday
+    out.setDate(ref.getDate() - daysBack);
+  } else
+  if (range === "month") out.setMonth(ref.getMonth() - 1);
   else if (range === "year") out.setFullYear(ref.getFullYear() - 1);
   const off = out.getTimezoneOffset() * 60000;
   return new Date(out.getTime() - off).toISOString().slice(0, 10);

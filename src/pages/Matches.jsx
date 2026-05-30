@@ -11,6 +11,7 @@ import {
 import { teamDisplayName } from "../utils/teamName.js";
 import { generateMatchCommentary } from "../claude/aiService.js";
 import { WIN_TARGET } from "../constants.js";
+import { formatDate } from "../utils/dates.js";
 
 function ScoreInputs({ s1, s2, setS1, setS2 }) {
   const num = (v) => v.replace(/\D/g, "").slice(0, 2);
@@ -50,16 +51,21 @@ function AddMatchForm({ date, teams, onSaved }) {
   const [s2, setS2] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const error =
-    t1 && t2 && t1 === t2 ? "Pick two different teams." : validateScores(s1, s2);
-  const ready = t1 && t2 && t1 !== t2 && !validateScores(s1, s2) && !busy;
+  const team1 = teams.find((t) => t.id === t1);
+  const team2 = teams.find((t) => t.id === t2);
+  const missingIds = (team1 && !team1.playerIds?.length) || (team2 && !team2.playerIds?.length);
+
+  const error = missingIds
+    ? "Team player data is missing. Open Teams, edit each team, and re-save."
+    : t1 && t2 && t1 === t2
+    ? "Pick two different teams."
+    : validateScores(s1, s2);
+  const ready = t1 && t2 && t1 !== t2 && !missingIds && !validateScores(s1, s2) && !busy;
 
   const submit = async () => {
     if (!ready) return;
     setBusy(true);
     try {
-      const team1 = teams.find((t) => t.id === t1);
-      const team2 = teams.find((t) => t.id === t2);
       const match = {
         date,
         team1Id: team1.id,
@@ -225,6 +231,7 @@ export default function Matches() {
 
       <div style={{ marginBottom: 12 }}>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <span className="meta" style={{ marginLeft: 8 }}>{formatDate(date)}</span>
       </div>
 
       {adding && <AddMatchForm date={date} teams={teams} onSaved={onSaved} />}

@@ -64,7 +64,8 @@ export const FAKE_TEAMS = [
 export const FAKE_MATCHES = [
   {
     id: "m1",
-    createdAt: "2026-05-22",
+    date: "2026-05-26",
+    createdAt: "2026-05-26",
     team1Id: "t1",
     team2Id: "t2",
     team1Name: "Street Kings",
@@ -78,7 +79,8 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m2",
-    createdAt: "2026-05-22",
+    date: "2026-05-26",
+    createdAt: "2026-05-26",
     team1Id: "t2",
     team2Id: "t1",
     team1Name: "Concrete Crew",
@@ -92,7 +94,8 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m3",
-    createdAt: "2026-05-22",
+    date: "2026-05-28",
+    createdAt: "2026-05-28",
     team1Id: "t3",
     team2Id: "t4",
     team1Name: "The Outsiders",
@@ -106,7 +109,8 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m4",
-    createdAt: "2026-05-22",
+    date: "2026-05-28",
+    createdAt: "2026-05-28",
     team1Id: "t4",
     team2Id: "t3",
     team1Name: "Stefan & Marko (Lefty)",
@@ -120,7 +124,8 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m5",
-    createdAt: "2026-05-22",
+    date: "2026-05-29",
+    createdAt: "2026-05-29",
     team1Id: "t3",
     team2Id: "t4",
     team1Name: "The Outsiders",

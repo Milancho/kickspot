@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PageHeader, Loading, Empty, todayISO } from "../components/ui.jsx";
 import { getPlayers, getAvailability, setAvailability } from "../firebase/service.js";
 import { playerLabel } from "../utils/teamName.js";
+import { formatDate } from "../utils/dates.js";
 
 export default function Availability() {
   const [date, setDate] = useState(todayISO());
@@ -36,6 +37,7 @@ export default function Availability() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
+        <span className="meta" style={{ marginLeft: 8 }}>{formatDate(date)}</span>
       </div>
 
       {players === null ? (
