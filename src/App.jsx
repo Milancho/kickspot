@@ -1,4 +1,5 @@
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
+import UpdatePrompt from "./components/UpdatePrompt.jsx";
 import Standings from "./pages/Standings.jsx";
 import Players from "./pages/Players.jsx";
 import Availability from "./pages/Availability.jsx";
@@ -38,6 +39,7 @@ function BottomNav() {
 export default function App() {
   return (
     <div className="app">
+      <UpdatePrompt />
       <Routes>
         <Route path="/" element={<Navigate to="/standings" replace />} />
         <Route path="/standings" element={<Standings />} />

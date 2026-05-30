@@ -11,8 +11,6 @@ import {
 import { teamDisplayName, playerLabel } from "../utils/teamName.js";
 import { inRange } from "../utils/dates.js";
 
-const SUPPORT_URL = import.meta.env.VITE_SUPPORT_URL;
-
 function StandingsTable({ rows }) {
   if (!rows.length) return <Empty>No standings yet.</Empty>;
   const sorted = sortStandings(rows);
@@ -117,16 +115,6 @@ export default function Standings() {
 
       {tab === "teams" && <StandingsTable rows={teamRows} />}
 
-      {SUPPORT_URL && (
-        <a
-          href={SUPPORT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="support-link"
-        >
-          ☕ Support KickSpot
-        </a>
-      )}
     </div>
   );
 }
