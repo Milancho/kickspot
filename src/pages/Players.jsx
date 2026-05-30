@@ -9,10 +9,26 @@ import {
 } from "../firebase/service.js";
 import { playerLabel } from "../utils/teamName.js";
 
+const contactsSupported =
+  typeof navigator !== "undefined" &&
+  "contacts" in navigator &&
+  "ContactsManager" in window;
+
 function PlayerForm({ initial, onSubmit, onClose, submitLabel }) {
   const [name, setName] = useState(initial?.name || "");
   const [nickname, setNickname] = useState(initial?.nickname || "");
   const [busy, setBusy] = useState(false);
+
+  const pickContact = async () => {
+    try {
+      const results = await navigator.contacts.select(["name"], { multiple: false });
+      if (results && results[0]?.name?.[0]) {
+        setName(results[0].name[0]);
+      }
+    } catch {
+      /* user cancelled or API unavailable */
+    }
+  };
 
   const submit = async () => {
     if (!name.trim() || busy) return;
@@ -29,13 +45,26 @@ function PlayerForm({ initial, onSubmit, onClose, submitLabel }) {
     <>
       <label className="field">
         <span>Name</span>
-        <input
-          type="text"
-          value={name}
-          autoFocus
-          placeholder="Your name"
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            type="text"
+            value={name}
+            autoFocus
+            placeholder="Player name"
+            style={{ flex: 1 }}
+            onChange={(e) => setName(e.target.value)}
+          />
+          {contactsSupported && (
+            <button
+              className="btn btn-ghost btn-sm"
+              type="button"
+              title="Pick from contacts"
+              onClick={pickContact}
+            >
+              📋
+            </button>
+          )}
+        </div>
       </label>
       <label className="field">
         <span>Nickname (optional)</span>
@@ -75,15 +104,17 @@ export default function Players() {
   return (
     <div className="page">
       <PageHeader title="Players" subtitle="The squad">
-        <button className="btn btn-sm" onClick={() => setJoining(true)}>
-          + Join
-        </button>
+        {adminMode && (
+          <button className="btn btn-sm" onClick={() => setJoining(true)}>
+            + Add player
+          </button>
+        )}
       </PageHeader>
 
       {players === null ? (
         <Loading label="Loading players…" />
       ) : players.length === 0 ? (
-        <Empty>No players yet. Tap “Join” to add yourself!</Empty>
+        <Empty>No players yet.{adminMode ? ' Tap “+ Add player” to get started.' : ' Ask the admin to add players.'}</Empty>
       ) : (
         players.map((p) => (
           <div className="card" key={p.id}>

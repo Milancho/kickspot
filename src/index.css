@@ -479,6 +479,90 @@ input[type="date"] {
   font-size: 0.8rem;
 }
 
+/* ── Live match ──────────────────────────────────────────────────────────── */
+
+.match-live {
+  border-color: var(--primary);
+  border-width: 2px;
+}
+
+.live-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+/* ── Win prediction bar ─────────────────────────────────────────────────── */
+
+.prediction-bar {
+  margin: 10px 0 4px;
+  font-size: 0.75rem;
+}
+
+.prediction-track {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  margin: 4px 0;
+  overflow: hidden;
+}
+
+.prediction-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.prediction-t1 {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.prediction-t2 {
+  color: var(--text-dim);
+  font-weight: 600;
+  float: right;
+}
+
+/* ── Mobile improvements ────────────────────────────────────────────────── */
+
+@media (max-width: 420px) {
+  .table th,
+  .table td {
+    padding: 8px 4px;
+    font-size: 0.78rem;
+  }
+
+  /* Hide "Played" column on very small screens — redundant with W+L */
+  .table .col-played {
+    display: none;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .btn {
+    min-height: 44px; /* larger tap target */
+  }
+
+  .toggle-pill {
+    min-height: 40px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .nav-item {
+    font-size: 0.6rem;
+  }
+
+  .nav-item .icon {
+    font-size: 1.3rem;
+  }
+}
+
 /* ── Update banner ──────────────────────────────────────────────────────── */
 
 .update-banner {

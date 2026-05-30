@@ -70,6 +70,44 @@ export function computeTeamStats(matches) {
   return stats;
 }
 
+/**
+ * Predict win probability using individual player win rates.
+ *
+ * For each team, averages the win rate of its players across ALL matches
+ * they've personally played (regardless of which team). This means:
+ * - New team combinations can still be predicted
+ * - Strong players raise their team's prediction even with new partners
+ *
+ * Returns { team1Pct, team2Pct } as integers summing to 100.
+ * Returns null if no player on either team has played any match yet.
+ */
+export function predictWinner(team1PlayerIds, team2PlayerIds, allMatches) {
+  if (!team1PlayerIds?.length || !team2PlayerIds?.length) return null;
+  const finished = (allMatches || []).filter((m) => m.status !== "live");
+  const ps = computePlayerStats(finished);
+
+  const avgRate = (playerIds) => {
+    const rates = playerIds.map((id) => {
+      const s = ps[id] || { wins: 0, losses: 0 };
+      const total = s.wins + s.losses;
+      return total > 0 ? s.wins / total : null; // null = no history
+    });
+    const known = rates.filter((r) => r !== null);
+    if (known.length === 0) return null;
+    return known.reduce((a, b) => a + b, 0) / known.length;
+  };
+
+  const r1 = avgRate(team1PlayerIds);
+  const r2 = avgRate(team2PlayerIds);
+
+  if (r1 === null && r2 === null) return null;
+  const rate1 = r1 ?? 0.5; // unknown player → treat as 50%
+  const rate2 = r2 ?? 0.5;
+  const total = rate1 + rate2 || 1;
+  const t1Pct = Math.round((rate1 / total) * 100);
+  return { team1Pct: t1Pct, team2Pct: 100 - t1Pct };
+}
+
 /** Points for an entity with { wins, losses }. */
 export function points(stat) {
   const wins = stat.wins || 0;
@@ -86,6 +124,66 @@ export function played(stat) {
  * Returns a new array sorted for a standings table:
  * points (desc) → fewer losses (asc) → name (asc, for stable ordering).
  */
+/**
+ * Group finished matches by ISO week (YYYY-Www) for the last N weeks.
+ * Returns [{ week, label, count }, ...] oldest first.
+ */
+export function computeWeeklyActivity(matches, weeks = 8) {
+  const finished = (matches || []).filter((m) => m.status !== "live" && m.date);
+  const now = new Date();
+  const result = [];
+  for (let i = weeks - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i * 7);
+    const weekStart = new Date(d);
+    weekStart.setDate(d.getDate() - d.getDay() + 1); // Monday
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const ws = weekStart.toISOString().slice(0, 10);
+    const we = weekEnd.toISOString().slice(0, 10);
+    const count = finished.filter((m) => m.date >= ws && m.date <= we).length;
+    result.push({
+      week: ws,
+      label: `${weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`,
+      count,
+    });
+  }
+  return result;
+}
+
+/**
+ * Count how often each player pair appears on the same team.
+ * Returns [{ pair: [id1, id2], names: [n1, n2], count, wins, losses }, ...]
+ * sorted by count desc.
+ */
+export function computePartnerStats(matches, players) {
+  const finished = (matches || []).filter((m) => m.status !== "live");
+  const pairMap = {};
+  const key = (a, b) => [a, b].sort().join("|");
+  const playerName = (id) => players.find((p) => p.id === id)?.name || id;
+
+  for (const m of finished) {
+    const w = matchWinner(m);
+    for (const side of ["team1", "team2"]) {
+      const ids = m[`${side}PlayerIds`] || [];
+      const won = w === side;
+      for (let i = 0; i < ids.length; i++) {
+        for (let j = i + 1; j < ids.length; j++) {
+          const k = key(ids[i], ids[j]);
+          if (!pairMap[k]) pairMap[k] = { ids: [ids[i], ids[j]], count: 0, wins: 0, losses: 0 };
+          pairMap[k].count++;
+          if (won) pairMap[k].wins++;
+          else pairMap[k].losses++;
+        }
+      }
+    }
+  }
+
+  return Object.values(pairMap)
+    .map((p) => ({ ...p, names: p.ids.map(playerName) }))
+    .sort((a, b) => b.count - a.count);
+}
+
 export function sortStandings(stats) {
   return [...stats].sort((a, b) => {
     const pts = points(b) - points(a);

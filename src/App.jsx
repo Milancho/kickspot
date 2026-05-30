@@ -7,6 +7,7 @@ import Teams from "./pages/Teams.jsx";
 import Matches from "./pages/Matches.jsx";
 import Reports from "./pages/Reports.jsx";
 import AdminMenu from "./pages/AdminMenu.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 
 const NAV_ITEMS = [
   { to: "/standings", label: "Standings", icon: "🏆" },
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/matches" element={<Matches />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/admin" element={<AdminMenu />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/standings" replace />} />
       </Routes>
       <BottomNav />

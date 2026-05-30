@@ -20,7 +20,7 @@ function StandingsTable({ rows }) {
         <tr>
           <th className="rank">#</th>
           <th className="col-name">Name</th>
-          <th>P</th>
+          <th className="col-played">P</th>
           <th>W</th>
           <th>L</th>
           <th>Pts</th>
@@ -31,7 +31,7 @@ function StandingsTable({ rows }) {
           <tr key={row.id}>
             <td className="rank">{i + 1}</td>
             <td className="col-name">{row.name}</td>
-            <td>{played(row)}</td>
+            <td className="col-played">{played(row)}</td>
             <td>{row.wins || 0}</td>
             <td>{row.losses || 0}</td>
             <td className="points">{points(row)}</td>

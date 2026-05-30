@@ -182,11 +182,36 @@ export function getAllMatches(onChange, onError) {
 export async function saveMatch(match) {
   const id = await backend.add("matches", {
     ...match,
+    status: "finished",
     createdAt: nowISO(),
     updatedAt: nowISO(),
   });
   await recalculateStats();
   return id;
+}
+
+/** Start a live match — no score yet, status = "live". */
+export async function startMatch(match) {
+  return backend.add("matches", {
+    ...match,
+    status: "live",
+    score1: null,
+    score2: null,
+    startedAt: nowISO(),
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  });
+}
+
+/** Finish a live match — record the score and recalculate stats. */
+export async function finishMatch(id, score1, score2) {
+  await backend.update("matches", id, {
+    score1,
+    score2,
+    status: "finished",
+    updatedAt: nowISO(),
+  });
+  await recalculateStats();
 }
 
 export async function updateMatch(id, patch) {
@@ -210,8 +235,9 @@ export async function recalculateStats() {
     backend.list("players"),
     backend.list("teams"),
   ]);
-  const ps = computePlayerStats(matches);
-  const ts = computeTeamStats(matches);
+  const finished = matches.filter((m) => m.status !== "live");
+  const ps = computePlayerStats(finished);
+  const ts = computeTeamStats(finished);
   await Promise.all([
     ...players.map((p) =>
       backend.update("players", p.id, {

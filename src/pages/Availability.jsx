@@ -22,6 +22,10 @@ export default function Availability() {
   }, [date]);
 
   const inCount = (players || []).filter((p) => avail[p.id]).length;
+  const today = todayISO();
+  const isToday = date === today;
+  // Show reminder if viewing today and no one has marked availability yet.
+  const showReminder = isToday && players && players.length > 0 && inCount === 0 && Object.keys(avail).length === 0;
 
   return (
     <div className="page">
@@ -29,6 +33,12 @@ export default function Availability() {
         title="Availability"
         subtitle={`${inCount} in for this session`}
       />
+
+      {showReminder && (
+        <div className="notice" style={{ borderLeftColor: "var(--primary)" }}>
+          📅 No one has marked availability for today yet. Let the group know you're in!
+        </div>
+      )}
 
       <div style={{ marginBottom: 12 }}>
         <input

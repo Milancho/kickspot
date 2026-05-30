@@ -241,7 +241,7 @@ export default function AdminMenu() {
       {admins === null ? (
         <Loading label="Loading…" />
       ) : !adminMode ? (
-        <LockedView admins={admins} onUnlock={login} />
+        <LockedView admins={admins} onUnlock={(a) => { login(a); navigate(-1); }} />
       ) : (
         <>
           <div className="card">
@@ -277,9 +277,17 @@ export default function AdminMenu() {
             ))}
           </div>
 
+          <div className="card">
+            <button
+              className="btn btn-block"
+              onClick={() => navigate("/dashboard")}
+            >
+              📊 Owner Dashboard
+            </button>
+          </div>
+
           <AddAdminForm />
           <VenueShare />
-          <SupportCard />
         </>
       )}
 
