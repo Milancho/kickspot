@@ -1,22 +1,34 @@
-import { useState } from "react";
-import { PageHeader, Empty, todayISO } from "../components/ui.jsx";
-import { FAKE_PLAYERS } from "../data/fakeData.js";
+import { useEffect, useState } from "react";
+import { PageHeader, Loading, Empty, todayISO } from "../components/ui.jsx";
+import { getPlayers, getAvailability, setAvailability } from "../firebase/service.js";
 import { playerLabel } from "../utils/teamName.js";
 
-/* Phase 1: local-state toggles only. Real per-date Firestore availability
- * arrives in Phase 5. */
 export default function Availability() {
   const [date, setDate] = useState(todayISO());
-  const [available, setAvailable] = useState(() => ({}));
+  const [players, setPlayers] = useState(null);
+  const [avail, setAvail] = useState({}); // playerId -> isAvailable
 
-  const toggle = (id) =>
-    setAvailable((prev) => ({ ...prev, [id]: !prev[id] }));
+  useEffect(() => getPlayers(setPlayers, () => setPlayers([])), []);
 
-  const inCount = FAKE_PLAYERS.filter((p) => available[p.id]).length;
+  useEffect(() => {
+    const unsub = getAvailability(date, (rows) => {
+      const map = {};
+      rows.forEach((r) => {
+        map[r.playerId] = r.isAvailable;
+      });
+      setAvail(map);
+    });
+    return unsub;
+  }, [date]);
+
+  const inCount = (players || []).filter((p) => avail[p.id]).length;
 
   return (
     <div className="page">
-      <PageHeader title="Availability" subtitle={`${inCount} in for this session`} />
+      <PageHeader
+        title="Availability"
+        subtitle={`${inCount} in for this session`}
+      />
 
       <div style={{ marginBottom: 12 }}>
         <input
@@ -26,18 +38,20 @@ export default function Availability() {
         />
       </div>
 
-      {FAKE_PLAYERS.length === 0 ? (
-        <Empty>No players to mark.</Empty>
+      {players === null ? (
+        <Loading label="Loading players…" />
+      ) : players.length === 0 ? (
+        <Empty>No players yet — add some on the Players page.</Empty>
       ) : (
-        FAKE_PLAYERS.map((p) => {
-          const isIn = !!available[p.id];
+        players.map((p) => {
+          const isIn = !!avail[p.id];
           return (
             <div className="card" key={p.id}>
               <div className="list-row">
-                <div className="name">{playerLabel(p, FAKE_PLAYERS)}</div>
+                <div className="name">{playerLabel(p, players)}</div>
                 <button
                   className={"toggle-pill " + (isIn ? "in" : "out")}
-                  onClick={() => toggle(p.id)}
+                  onClick={() => setAvailability(p, date, !isIn)}
                 >
                   {isIn ? "I'm in" : "I'm out"}
                 </button>

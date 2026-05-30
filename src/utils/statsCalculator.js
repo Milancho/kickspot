@@ -12,14 +12,63 @@
  * Sort order: points → fewer losses → name
  * (cumulative point totals / goal difference are not tracked)
  *
- * The full recalculateTeamStats(date) / recalculatePlayerStats() rebuild
- * (reads ALL matches, rewrites every stat from scratch) lands in Phase 7.
- * For now these are the pure display helpers the standings tables use.
+ * `computePlayerStats` / `computeTeamStats` rebuild win-loss FROM SCRATCH out
+ * of the full match list — this is what prevents drift. `service.js` calls
+ * them after every match save / edit / delete and writes the results back.
+ * They stay pure (no Firebase) so they're trivially unit-testable.
  */
 
 import { POINTS } from "../constants.js";
 
 export { POINTS };
+
+/** Winner of a match: "team1", "team2", or null if scores tie (shouldn't happen). */
+export function matchWinner(match) {
+  if (match.score1 === match.score2) return null;
+  return match.score1 > match.score2 ? "team1" : "team2";
+}
+
+/**
+ * Win-loss per player ID across all matches, rebuilt from scratch.
+ * Returns { [playerId]: { wins, losses } }.
+ */
+export function computePlayerStats(matches) {
+  const stats = {};
+  const bump = (id, key) => {
+    if (!id) return;
+    if (!stats[id]) stats[id] = { wins: 0, losses: 0 };
+    stats[id][key] += 1;
+  };
+  for (const m of matches || []) {
+    const w = matchWinner(m);
+    if (!w) continue;
+    const winners = w === "team1" ? m.team1PlayerIds : m.team2PlayerIds;
+    const losers = w === "team1" ? m.team2PlayerIds : m.team1PlayerIds;
+    (winners || []).forEach((id) => bump(id, "wins"));
+    (losers || []).forEach((id) => bump(id, "losses"));
+  }
+  return stats;
+}
+
+/**
+ * Win-loss per team document ID across all matches, rebuilt from scratch.
+ * Returns { [teamId]: { wins, losses } }.
+ */
+export function computeTeamStats(matches) {
+  const stats = {};
+  const bump = (id, key) => {
+    if (!id) return;
+    if (!stats[id]) stats[id] = { wins: 0, losses: 0 };
+    stats[id][key] += 1;
+  };
+  for (const m of matches || []) {
+    const w = matchWinner(m);
+    if (!w) continue;
+    bump(m.team1Id, w === "team1" ? "wins" : "losses");
+    bump(m.team2Id, w === "team1" ? "losses" : "wins");
+  }
+  return stats;
+}
 
 /** Points for an entity with { wins, losses }. */
 export function points(stat) {

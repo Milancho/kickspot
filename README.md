@@ -43,11 +43,19 @@ dev server — Standings and Players switch to live Firestore automatically.
 
 ## Status
 
-Foundation is built and runs (Phases 0–2): scaffold, routing, bottom nav, all
-seven pages with sample data, env-guarded Firebase reads, and an interactive
-Create Team flow (auto-naming, nickname, order-independent reuse) prototyped
-ahead of Phase 6. Writes, admin PIN, availability, full team/match persistence,
-AI features, reports, and deploy are still to come. See [docs/TASKS.md](docs/TASKS.md).
+All application code (Phases 0–10) is implemented and runs end-to-end:
+players (join / edit / soft-delete), admin PIN + first-launch setup,
+per-date availability, team formation (auto-naming, nickname, order-independent
+reuse by player ID), match recording with live stats recalculation, Claude AI
+features (team names, balanced split, commentary — with offline fallbacks),
+date-range standings, reports, and venue sharing. Unit tests cover the stats
+calculator (`npm test`).
+
+Architecture: all data access goes through `service.js` → `backend.js`, which
+routes to **Firestore** (when `.env` keys exist) or an **in-memory demo store**
+otherwise — so the app is fully usable locally now and goes live with no code
+changes. **Still to do (human-owned):** create the Firebase project, hosting,
+CI/CD, and seed real data. See [docs/TASKS.md](docs/TASKS.md).
 
 ## Docs
 

@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "../context/AdminContext.jsx";
+import { todayISO } from "../utils/dates.js";
+
+export { todayISO };
 
 /** Shared page header with title, optional subtitle, and a settings gear
  *  that routes to the admin menu (PIN entry lives there in Phase 4). */
@@ -56,9 +59,19 @@ export function Tabs({ options, value, onChange }) {
   );
 }
 
-/** Today's date as a "YYYY-MM-DD" string (local time). */
-export function todayISO() {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+/** Modal dialog with a backdrop. `onClose` fires on backdrop click and ✕. */
+export function Modal({ title, onClose, children }) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>{title}</h2>
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
 }

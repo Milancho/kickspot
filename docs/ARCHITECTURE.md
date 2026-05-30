@@ -164,7 +164,9 @@ Every page reads it to conditionally render edit/delete controls.
   team2Id         string
   team1Name       string
   team2Name       string
-  team1Players    array
+  team1PlayerIds  array        IDs — used to credit the right players in stats
+  team2PlayerIds  array
+  team1Players    array        names — for display only
   team2Players    array
   score1          number
   score2          number

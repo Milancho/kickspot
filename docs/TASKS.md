@@ -9,17 +9,58 @@
 
 ## Progress
 
-- ✅ **Phase 0 — Project Setup** (scaffold, routing, bottom nav, PWA manifest)
-- ✅ **Phase 1 — UI with sample data** (all 7 pages, loading/empty states)
-- ✅ **Phase 2 — Firebase reads** (env-guarded config, `getPlayers` listener,
-  `Player` model; Standings + Players wired with demo-data fallback)
-- 🟡 **Phase 6 (partial)** — Create Team flow prototyped against sample data:
-  auto-naming, nickname, 2–4 players, order-independent reuse by player ID.
-  Not yet persisted to Firestore.
-- ⬜ Phases 3–5, 7–10 — not started.
+All application code (Phases 0–10) is implemented and runs end-to-end.
 
-Demo mode runs without keys; add `.env` for live Firestore. Build is green
-(`npm run build`) with no console errors.
+- ✅ **Phase 0** — scaffold, routing, bottom nav, PWA manifest + SVG icon
+- ✅ **Phase 1** — all 7 pages, loading/empty states
+- ✅ **Phase 2** — env-guarded backend, realtime reads, models
+- ✅ **Phase 3** — Join form, add / edit / soft-delete players
+- ✅ **Phase 4** — PIN unlock + first-launch setup, admin management, conditional controls
+- ✅ **Phase 5** — per-date availability (upsert), live count
+- ✅ **Phase 6** — teams persist: create, edit, delete, copy-from-date,
+  order-independent reuse by player ID, available-pool selection
+- ✅ **Phase 7** — add / edit / delete matches (first-to-21, no ties),
+  full stats recalc on every change, unit tests (`npm test`, 7 passing)
+- ✅ **Phase 8** — Claude AI: team-name suggestions, balanced-team suggester,
+  match commentary — all with graceful local fallbacks (work without a key)
+- ✅ **Phase 9** — date-range standings (week/month/year/all), reports,
+  venue share via Web Share API
+- ✅ **Phase 10** — loading/empty/error states, disabled-state styling, PWA icon
+
+### Architecture note (added during build)
+
+All backend access goes through `service.js` → `backend.js`, which routes to
+either **real Firestore** (when `.env` keys are present) or an **in-memory demo
+store** (`demoStore.js`, seeded from `data/fakeData.js`). The app is fully
+functional locally in demo mode and switches to Firestore with zero code
+changes once configured.
+
+### Still owned by you (the human), planned for later
+
+**Firebase setup (do in order):**
+1. Create the Firebase project + enable Firestore (test mode to start)
+2. Fill `.env` from `.env.example` (Firebase keys + Claude key)
+3. Open the app — first-launch PIN setup creates `/config/admins` with a hashed PIN
+4. Add `/config/venue` in the Firebase console (name, address, lat, lng)
+5. Go to Firebase console → **Firestore → Rules** — replace test mode with the
+   validated rules documented in the Security section of CLAUDE.md
+6. Go to **google.com/recaptcha** → register a reCAPTCHA v3 site key
+   (add your hosting domain + localhost as allowed origins)
+7. Go to Firebase console → **App Check** → register your web app with that key
+8. Add `VITE_RECAPTCHA_SITE_KEY=<key>` to `.env`
+9. Click **Enforce** on Firestore in the App Check console — from this point
+   scripts cannot write to your database
+10. Set a **GCP billing budget** in Google Cloud console with a hard cap (e.g. $10/month)
+11. Set an **Anthropic spending limit** for the Claude API key
+12. `firebase init hosting` → set `dist` as public dir, configure rewrites for SPA
+13. `firebase deploy` → app is live
+14. Optional: add a GitHub Action (`npm ci && npm test && npm run build && firebase deploy`)
+
+**On-device testing:**
+- Android Chrome: open URL → "Add to Home Screen" prompt appears
+- iOS Safari: Share button → "Add to Home Screen"
+
+Build is green (`npm run build`), tests pass (`npm test`), no console errors.
 
 ---
 

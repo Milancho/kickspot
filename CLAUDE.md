@@ -90,12 +90,12 @@ Edit and delete buttons are conditionally rendered based on `adminMode`.
 ## Firestore Structure
 
 ```
-/config/admins     { list: [{name: string, pin: string}] }
+/config/admins     { list: [{name: string, pin: string}] }  ← pin = SHA-256 hash, never plain text
 /config/venue      { name: string, address: string, lat: number, lng: number }
 
 /players/{id}      { name, nickname, wins, losses, isDeleted, createdAt }
 /teams/{id}        { name, nickname, date, playerIds[], playerNames[], wins, losses }
-/matches/{id}      { date, team1Id, team2Id, team1Name, team2Name, team1Players[], team2Players[], score1, score2, createdAt, updatedAt }
+/matches/{id}      { date, team1Id, team2Id, team1Name, team2Name, team1PlayerIds[], team2PlayerIds[], team1Players[], team2Players[], score1, score2, createdAt, updatedAt }
 /availability/{id} { date, playerId, playerName, isAvailable, updatedAt }
 ```
 
@@ -202,6 +202,19 @@ VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 ```
+
+---
+
+## Security
+
+| Layer | What it does |
+|---|---|
+| **PIN hashing** | `addAdmin` / `checkPin` always use `hashPin()` (SHA-256). Firestore never stores a plain PIN. |
+| **App Check** | reCAPTCHA v3 token attached to every Firestore request. Blocks scripts / direct API calls. Activated by adding `VITE_RECAPTCHA_SITE_KEY` + enforcing in Firebase console. Skipped in local dev (no key in `.env`). |
+| **Firestore rules** | Validate document shape. Without Firebase Auth, they can't enforce who writes — App Check handles that. |
+| **Claude key exposure** | `VITE_CLAUDE_API_KEY` is visible in the browser bundle. Set a monthly spending cap in the Anthropic console. |
+
+Admin mode resets on page refresh — the PIN gate is a UI convenience, not a cryptographic boundary. Its purpose is preventing casual accidents, not defending against a determined attacker.
 
 ---
 
