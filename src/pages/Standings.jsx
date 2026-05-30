@@ -22,10 +22,10 @@ function StandingsTable({ rows }) {
         <tr>
           <th className="rank">#</th>
           <th className="col-name">Name</th>
-          <th className="col-played">P</th>
-          <th>W</th>
-          <th>L</th>
-          <th>Pts</th>
+          <th className="col-played">Played</th>
+          <th>Won</th>
+          <th>Lost</th>
+          <th>Points</th>
         </tr>
       </thead>
       <tbody>

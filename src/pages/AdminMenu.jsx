@@ -14,11 +14,13 @@ function PinField({ value, onChange, onEnter, placeholder = "••••" }) {
   return (
     <input
       className="pin-input"
-      type="password"
+      type="text"
       inputMode="numeric"
+      autoComplete="one-time-code"
       maxLength={4}
       autoFocus
       placeholder={placeholder}
+      style={{ WebkitTextSecurity: "disc", textSecurity: "disc" }}
       value={value}
       onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 4))}
       onKeyDown={(e) => e.key === "Enter" && onEnter && onEnter()}
