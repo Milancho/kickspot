@@ -216,8 +216,14 @@ export default function AdminMenu() {
   const navigate = useNavigate();
   const { admin, adminMode, login, logout } = useAdmin();
   const [admins, setAdmins] = useState(null);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => getAdmins(setAdmins), []);
+  useEffect(() =>
+    getAdmins(setAdmins, () => {
+      setAdmins([]);
+      setLoadError(true);
+    })
+  , []);
 
   return (
     <div className="page">
@@ -225,6 +231,12 @@ export default function AdminMenu() {
         title="Admin"
         subtitle={adminMode ? `Unlocked as ${admin.name}` : "Settings & access"}
       />
+
+      {loadError && (
+        <div className="notice">
+          ⚠️ Could not reach the database. Check your connection and refresh.
+        </div>
+      )}
 
       {admins === null ? (
         <Loading label="Loading…" />
@@ -278,6 +290,13 @@ export default function AdminMenu() {
       >
         ← Back
       </button>
+
+      <div style={{ textAlign: "center", marginTop: 20, paddingBottom: 8 }}>
+        <div className="meta">KickSpot v1</div>
+        <div className="meta" style={{ marginTop: 2 }}>
+          Made with ❤️ by Milancho
+        </div>
+      </div>
     </div>
   );
 }

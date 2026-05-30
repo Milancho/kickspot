@@ -54,14 +54,13 @@ const RANGES = [
 export default function Standings() {
   const [tab, setTab] = useState("players");
   const [range, setRange] = useState("all");
-  const [date, setDate] = useState(todayISO());
   const [players, setPlayers] = useState(null);
   const [matches, setMatches] = useState([]);
   const [teams, setTeams] = useState([]);
 
   useEffect(() => getPlayers(setPlayers, () => setPlayers([])), []);
   useEffect(() => getAllMatches(setMatches), []);
-  useEffect(() => getTeams(date, setTeams), [date]);
+  useEffect(() => getTeams(setTeams), []);
 
   // Player standings: all-time uses the player docs; a range recomputes from
   // matches within that range.
@@ -116,18 +115,7 @@ export default function Standings() {
         </>
       )}
 
-      {tab === "teams" && (
-        <>
-          <div style={{ marginBottom: 12 }}>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-          <StandingsTable rows={teamRows} />
-        </>
-      )}
+      {tab === "teams" && <StandingsTable rows={teamRows} />}
 
       {SUPPORT_URL && (
         <a

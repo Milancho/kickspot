@@ -124,33 +124,29 @@ export function setAvailability(player, date, isAvailable) {
 
 /* ── Teams ───────────────────────────────────────────────────────────────── */
 
-export function getTeams(date, onChange, onError) {
+/** All teams — teams are global (no date), matches are per day. */
+export function getTeams(onChange, onError) {
   return backend.subscribe(
     "teams",
     (rows) => {
       const teams = rows
         .map((r) => Team.fromFirestore(r.id, r))
-        .filter((t) => !date || t.date === date);
+        .sort((a, b) => (b.wins || 0) - (a.wins || 0));
       onChange(teams);
     },
     onError
   );
 }
 
-/** All teams across every date — used for order-independent reuse detection. */
-export function getAllTeams(onChange, onError) {
-  return getTeams(null, onChange, onError);
-}
-
 export function createTeam(team) {
   return backend.add("teams", {
     name: team.name.trim(),
     nickname: (team.nickname || "").trim(),
-    date: team.date,
     playerIds: team.playerIds,
     playerNames: team.playerNames,
     wins: 0,
     losses: 0,
+    createdAt: nowISO(),
   });
 }
 
@@ -163,24 +159,6 @@ export function deleteTeam(id) {
 }
 
 /** Copy a previous date's teams to a new date with stats reset to zero. */
-export async function copyTeamsFromDate(fromDate, toDate) {
-  const all = await backend.list("teams");
-  const source = all.filter((t) => t.date === fromDate);
-  await Promise.all(
-    source.map((t) =>
-      backend.add("teams", {
-        name: t.name,
-        nickname: t.nickname || "",
-        date: toDate,
-        playerIds: t.playerIds,
-        playerNames: t.playerNames,
-        wins: 0,
-        losses: 0,
-      })
-    )
-  );
-  return source.length;
-}
 
 /* ── Matches & stats ─────────────────────────────────────────────────────── */
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader, Tabs, Empty } from "../components/ui.jsx";
-import { getAllMatches, getPlayers, getAllTeams } from "../firebase/service.js";
+import { getAllMatches, getPlayers, getTeams } from "../firebase/service.js";
 import {
   computePlayerStats,
   computeTeamStats,
@@ -24,7 +24,7 @@ export default function Reports() {
 
   useEffect(() => getAllMatches(setMatches), []);
   useEffect(() => getPlayers(setPlayers, () => setPlayers([])), []);
-  useEffect(() => getAllTeams(setTeams), []);
+  useEffect(() => getTeams(setTeams), []);
 
   const report = useMemo(() => {
     const today = todayISO();

@@ -107,7 +107,8 @@ Edit and delete buttons are conditionally rendered based on `adminMode`.
 /config/venue      { name: string, address: string, lat: number, lng: number }
 
 /players/{id}      { name, nickname, wins, losses, isDeleted, createdAt }
-/teams/{id}        { name, nickname, date, playerIds[], playerNames[], wins, losses }
+/teams/{id}        { name, nickname, playerIds[], playerNames[], wins, losses, createdAt }
+                   ← teams are GLOBAL (no date). Matches are per day.
 /matches/{id}      { date, team1Id, team2Id, team1Name, team2Name, team1PlayerIds[], team2PlayerIds[], team1Players[], team2Players[], score1, score2, createdAt, updatedAt }
 /availability/{id} { date, playerId, playerName, isAvailable, updatedAt }
 ```

@@ -23,7 +23,7 @@ export const FAKE_TEAMS = [
     id: "t1",
     name: "Marko & Ana",
     nickname: "Street Kings",
-    date: "2026-05-29",
+    createdAt: "2026-05-22",
     playerIds: ["p1", "p3"],
     playerNames: ["Marko (The Wall)", "Ana"],
     wins: 0,
@@ -33,19 +33,17 @@ export const FAKE_TEAMS = [
     id: "t2",
     name: "Stefan & Nikola",
     nickname: "Concrete Crew",
-    date: "2026-05-29",
+    createdAt: "2026-05-22",
     playerIds: ["p2", "p5"],
     playerNames: ["Stefan", "Nikola"],
     wins: 0,
     losses: 0,
   },
   {
-    // A team from a previous session — forming Luka + Nikola again (any order)
-    // reuses this team rather than creating a new one.
     id: "t3",
     name: "Luka & Nikola",
     nickname: "The Outsiders",
-    date: "2026-05-22",
+    createdAt: "2026-05-22",
     playerIds: ["p4", "p5"],
     playerNames: ["Luka", "Nikola"],
     wins: 0,
@@ -55,7 +53,7 @@ export const FAKE_TEAMS = [
     id: "t4",
     name: "Stefan & Marko (Lefty)",
     nickname: "",
-    date: "2026-05-22",
+    createdAt: "2026-05-22",
     playerIds: ["p2", "p6"],
     playerNames: ["Stefan", "Marko (Lefty)"],
     wins: 0,
@@ -66,7 +64,7 @@ export const FAKE_TEAMS = [
 export const FAKE_MATCHES = [
   {
     id: "m1",
-    date: "2026-05-29",
+    createdAt: "2026-05-22",
     team1Id: "t1",
     team2Id: "t2",
     team1Name: "Street Kings",
@@ -80,7 +78,7 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m2",
-    date: "2026-05-29",
+    createdAt: "2026-05-22",
     team1Id: "t2",
     team2Id: "t1",
     team1Name: "Concrete Crew",
@@ -94,7 +92,7 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m3",
-    date: "2026-05-22",
+    createdAt: "2026-05-22",
     team1Id: "t3",
     team2Id: "t4",
     team1Name: "The Outsiders",
@@ -108,7 +106,7 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m4",
-    date: "2026-05-22",
+    createdAt: "2026-05-22",
     team1Id: "t4",
     team2Id: "t3",
     team1Name: "Stefan & Marko (Lefty)",
@@ -122,7 +120,7 @@ export const FAKE_MATCHES = [
   },
   {
     id: "m5",
-    date: "2026-05-22",
+    createdAt: "2026-05-22",
     team1Id: "t3",
     team2Id: "t4",
     team1Name: "The Outsiders",

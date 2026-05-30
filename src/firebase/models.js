@@ -42,20 +42,20 @@ export class Team {
     id = null,
     name = "",
     nickname = "",
-    date = "",
     playerIds = [],
     playerNames = [],
     wins = 0,
     losses = 0,
+    createdAt = null,
   } = {}) {
     this.id = id;
     this.name = name;
     this.nickname = nickname;
-    this.date = date;
     this.playerIds = playerIds;
     this.playerNames = playerNames;
     this.wins = wins;
     this.losses = losses;
+    this.createdAt = createdAt;
   }
 
   static fromFirestore(id, data) {

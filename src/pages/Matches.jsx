@@ -83,8 +83,7 @@ function AddMatchForm({ date, teams, onSaved }) {
   if (teams.length < 2) {
     return (
       <div className="notice">
-        Need at least two teams on this date to record a match. Form teams on the
-        Teams page first.
+        Need at least two teams to record a match. Create teams on the Teams page first.
       </div>
     );
   }
@@ -93,7 +92,7 @@ function AddMatchForm({ date, teams, onSaved }) {
     <div className="card">
       <label className="field">
         <span>Team 1</span>
-        <select value={t1} onChange={(e) => setT1(e.target.value)}>
+        <select value={t1} onChange={(e) => { setT1(e.target.value); if (t2 === e.target.value) setT2(""); }}>
           <option value="">Select…</option>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>
@@ -106,11 +105,13 @@ function AddMatchForm({ date, teams, onSaved }) {
         <span>Team 2</span>
         <select value={t2} onChange={(e) => setT2(e.target.value)}>
           <option value="">Select…</option>
-          {teams.map((t) => (
-            <option key={t.id} value={t.id}>
-              {teamDisplayName(t)}
-            </option>
-          ))}
+          {teams
+            .filter((t) => t.id !== t1)
+            .map((t) => (
+              <option key={t.id} value={t.id}>
+                {teamDisplayName(t)}
+              </option>
+            ))}
         </select>
       </label>
       <label className="field">
@@ -198,7 +199,7 @@ export default function Matches() {
   const [commentary, setCommentary] = useState(null); // { loading, text }
 
   useEffect(() => getMatches(date, setMatches), [date]);
-  useEffect(() => getTeams(date, setTeams), [date]);
+  useEffect(() => getTeams(setTeams), []);
 
   const onSaved = async (match) => {
     setAdding(false);
