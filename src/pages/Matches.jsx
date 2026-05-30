@@ -13,7 +13,6 @@ import {
 } from "../firebase/service.js";
 import { teamDisplayName } from "../utils/teamName.js";
 import { generateMatchCommentary } from "../claude/aiService.js";
-import { WIN_TARGET } from "../constants.js";
 import { predictWinner } from "../utils/statsCalculator.js";
 
 function ScoreInputs({ s1, s2, setS1, setS2 }) {
@@ -32,7 +31,6 @@ function validateScores(s1, s2) {
   const b = Number(s2);
   if (s1 === "" || s2 === "") return "Enter both scores.";
   if (a === b) return "A set can't end in a draw — one team must win.";
-  if (Math.max(a, b) < WIN_TARGET) return `The winning team must reach ${WIN_TARGET}.`;
   return "";
 }
 
@@ -55,16 +53,19 @@ function StartMatchForm({ date, teams, allMatches, onStarted, onSaved }) {
   const canStart = t1 && t2 && t1 !== t2 && !busy;
   const canSave = canStart && !scoreError;
 
+  const noPlayers = (team) => !team?.playerIds?.length;
+  const missingPlayers = (team1 && noPlayers(team1)) || (team2 && noPlayers(team2));
+
   const buildMatchData = () => ({
     date,
     team1Id: team1.id,
     team2Id: team2.id,
     team1Name: teamDisplayName(team1),
     team2Name: teamDisplayName(team2),
-    team1PlayerIds: team1.playerIds,
-    team2PlayerIds: team2.playerIds,
-    team1Players: team1.playerNames,
-    team2Players: team2.playerNames,
+    team1PlayerIds: team1.playerIds || [],
+    team2PlayerIds: team2.playerIds || [],
+    team1Players: team1.playerNames || [],
+    team2Players: team2.playerNames || [],
   });
 
   const handleStart = async () => {
@@ -107,6 +108,12 @@ function StartMatchForm({ date, teams, allMatches, onStarted, onSaved }) {
         </select>
       </label>
 
+      {missingPlayers && (
+        <div className="notice" style={{ borderLeftColor: "var(--danger)" }}>
+          ⚠️ One or more teams have no players linked — stats won't update. Go to Teams → Edit to add players.
+        </div>
+      )}
+
       {prediction && (
         <div className="prediction-bar">
           <span className="prediction-t1">{teamDisplayName(team1)} {prediction.team1Pct}%</span>
@@ -122,7 +129,7 @@ function StartMatchForm({ date, teams, allMatches, onStarted, onSaved }) {
           {busy && mode === "live" ? "Starting…" : "🟢 Match is playing now (enter score later)"}
         </button>
         <div className="meta" style={{ textAlign: "center" }}>— or —</div>
-        <label className="field"><span>Set score (first to {WIN_TARGET} wins)</span></label>
+        <label className="field"><span>Set score (e.g. 21:15, 16:14, 24:22)</span></label>
         <ScoreInputs s1={s1} s2={s2} setS1={setS1} setS2={setS2} />
         {(s1 || s2) && scoreError && <div className="error-text">{scoreError}</div>}
         <button className="btn btn-ghost btn-block" disabled={!canSave} onClick={handleSaveDirect}>

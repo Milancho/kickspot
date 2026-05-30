@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader, Loading } from "../components/ui.jsx";
 import { useAdmin } from "../context/AdminContext.jsx";
-import { getAllMatches, getPlayers, getTeams } from "../firebase/service.js";
+import { getAllMatches, getPlayers, getTeams, recalculateStats } from "../firebase/service.js";
 import {
   computePlayerStats,
   computeWeeklyActivity,
@@ -63,6 +63,20 @@ export default function Dashboard() {
   const [matches, setMatches] = useState(null);
   const [players, setPlayers] = useState(null);
   const [teams, setTeams] = useState(null);
+  const [recalcBusy, setRecalcBusy] = useState(false);
+  const [recalcDone, setRecalcDone] = useState(false);
+
+  const handleRecalc = async () => {
+    setRecalcBusy(true);
+    setRecalcDone(false);
+    try {
+      await recalculateStats();
+      setRecalcDone(true);
+      setTimeout(() => setRecalcDone(false), 3000);
+    } finally {
+      setRecalcBusy(false);
+    }
+  };
 
   // Redirect non-admins
   if (!adminMode) {
@@ -226,6 +240,21 @@ export default function Dashboard() {
                 sub={`${stats.dominant.team1Name} vs ${stats.dominant.team2Name} · ${stats.dominant.date}`}
               />
             )}
+          </div>
+
+          {/* ── Maintenance ─────────────────────────────────────────────── */}
+          <div className="card">
+            <div className="name" style={{ marginBottom: 8 }}>🔄 Maintenance</div>
+            <div className="meta" style={{ marginBottom: 10 }}>
+              If standings look wrong, recalculate all player and team stats from scratch.
+            </div>
+            <button
+              className="btn btn-block"
+              disabled={recalcBusy}
+              onClick={handleRecalc}
+            >
+              {recalcBusy ? "Recalculating…" : recalcDone ? "✅ Done!" : "🔄 Recalculate stats"}
+            </button>
           </div>
 
           {/* ── Technical Links ─────────────────────────────────────────── */}
